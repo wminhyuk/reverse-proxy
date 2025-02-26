@@ -1,4 +1,3 @@
-
 # reverse-proxy
 - 성능
 - 부하분산(LB)
@@ -8,9 +7,8 @@
 ```bash
 $ python -m http.server --directory pyweb1 8001
 $ python -m http.server --directory pyweb2 8002
-$ python -m http.server --directory blog 8003
+$ python -m http.server 8003 --directory blog 
 ```
-
 ## nginx
 - https://ubuntu.com/tutorials/install-and-configure-nginx#1-overview
 ```bash
@@ -32,11 +30,11 @@ $ pwd
 $ tree -L 2
 .
 ├── ngrinder-agent
-│   ├── lib
-│   ├── run_agent.sh
-│   ├── run_agent_bg.sh
-│   ├── run_agent_internal.sh
-│   └── stop_agent.sh
+│   ├── lib
+│   ├── run_agent.sh
+│   ├── run_agent_bg.sh
+│   ├── run_agent_internal.sh
+│   └── stop_agent.sh
 └── ngrinder-controller
     └── ngrinder-controller-3.5.9-p1.war
 
@@ -56,10 +54,11 @@ $ docker compose start  # 중지된 컨테이너 다시 시작
 $ docker compose restart  # 컨테이너 재시작
 $ docker compose down  # 컨테이너, 네트워크 제거
 $ sudo docker compose stats # 성능 모니터링
-
-# scale out
-$ sudo docker compose up -d --scale web1=3
+$ sudo docker compose up -d --scale web1=3 # scale out
+$ sudo docker compose logs -f api # 로그확인
+$ sudo docker compose up -d --build api # 특정 컨테이너 다시 빌드하여 띄우기
 ```
+
 ## nginx
 ```bash
 $ sudo docker exec -it <LB_NAME> bash
@@ -70,4 +69,17 @@ $ nginx -s reload
 - https://fastapi.tiangolo.com/
 ```bash
 $ fastapi dev main.py
+```
+
+## PDM to requirements.txt
+```bash
+$ pdm export -o requirements.txt --without-hashes
+```
+
+## Docker build & push & pull run
+```bash
+$ sudo docker build -t sawyertom/api:6.1.0 -f docker/fastapi/Dockerfile .
+$ sudo docker login
+$ sudo docker push sawyertom/api:6.1.0
+$ sudo docker run -d --name api610 -p 8610:80 sawyertom/api:6.1.0
 ```
