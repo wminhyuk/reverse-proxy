@@ -8,15 +8,12 @@ services:
       - "12000-12009:12000-12009"
     volumes:
       - ./ngrinder-controller:/opt/ngrinder-controller
-    links:
-      - web1
-
   agent:
     image: ngrinder/agent
     restart: always
     links:
       - controller
-      - web1  
+
   web1:
     image: httpd:latest
     volumes:
@@ -29,7 +26,7 @@ services:
     expose:
       - "80"
     environment:
-      - VIRTUAL_HOST=172.17.0.1,localhost,127.0.0.1
+      - VIRTUAL_HOST=172.17.0.1
       - VIRTUAL_PORT=80
   
   nginx-proxy:
@@ -40,4 +37,3 @@ services:
       - /var/run/docker.sock:/tmp/docker.sock:ro
     depends_on:
       - web1
-
