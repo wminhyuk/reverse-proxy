@@ -2,12 +2,10 @@ from typing import Union
 from fastapi import FastAPI
 import random
 import time
+import numpy as np
+import matplotlib.pyplot as plt
 
 app = FastAPI()
-
-# 상수
-N = 10**4  # 100만 개 요소
-N = 10_000
 
 @app.get("/")
 def read_root():
@@ -90,6 +88,36 @@ def add_arrays(N, fun, fun_plus):
     addition_time = add_end_time - add_start_time
     return array_creation_time, addition_time
 
+@app.get("/add-large-arrays-numpy-choices")
+# NumPy 기반 함수
+def gen_r_array_choices_numpy(N):
+    a = np.random.choice(range(101), size=N)
+    b = np.random.choice(range(101), size=N)
+    return a, b
+
+# Python random 기반 함수
+def gen_r_array_choices(N):
+    a = random.choices(range(101), k=N)
+    b = random.choices(range(101), k=N)
+    return a, b
+
+# 고차 함수: 실행 시간 측정
+def measure_time(func, N_values):
+    times = []
+    for N in N_values:
+        start = time.time()
+        func(N)
+        times.append(time.time() - start)
+    return times
+
+# 테스트할 N 값 생성 (1부터 1,000,000까지 100개 간격)
+N_values = np.linspace(1, 1_000_000, 100, dtype=int)
+
+# TODO 각 함수의 실행 시간 계산 위 배열에 추가
+numpy_times = []
+random_times = []
+numpy_times = measure_time(gen_r_array_choices_numpy, N_values)
+random_times = measure_time(gen_r_array_choices, N_values)
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
