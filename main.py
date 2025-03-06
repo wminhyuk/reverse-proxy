@@ -3,9 +3,12 @@ from fastapi import FastAPI
 import random
 import time
 import numpy as np
-import matplotlib.pyplot as plt
 
 app = FastAPI()
+
+# 상수
+N = 10**5
+#N = 10_000
 
 @app.get("/")
 def read_root():
@@ -14,7 +17,7 @@ def read_root():
 
     result = []
     for i in range(len(a)): # zip(a, b)
-        result.append(a[i] + b[i])
+        result.append(a[i] + b[i])  
         
     return {"Hello": result}
 
@@ -35,31 +38,18 @@ def two_dimensional_array():
     
     result = a + b
     return {"result": result}
-
-@app.get("/add-large-arrays")
-def add_large_arrays():
-    array_creation_time, addition_time = add_arrays(N, gen_r_array_randint, plus_py)
-    return {
-        "array_creation_time": array_creation_time,
-        "addition_time": addition_time
-        }
     
 @app.get("/add-large-arrays-choices")
-def add_large_arrays_choices():
-    array_creation_time, addition_time = add_arrays(N, gen_r_array_choices, plus_py)
+def add_large_arrays_numpy():
+    array_creation_time, addition_time = add_arrays(N, gen_r_array_numpy, plus_numpy)
     return {
         "array_creation_time": array_creation_time,
         "addition_time": addition_time
         }
-    
-def gen_r_array_randint(N):
-    a = [random.randint(0, 100) for _ in range(N)]
-    b = [random.randint(0, 100) for _ in range(N)]
-    return a,b
 
-def gen_r_array_choices(N):
-    a = random.choices(range(101), k=N)
-    b = random.choices(range(101), k=N)
+def gen_r_array_numpy(N):
+    a = np.random.randint(1, 101, size=N)  # 1 이상 100 이하의 정수
+    b = np.random.randint(1, 101, size=N)
     return a,b
 
 def plus_py(a, b):
@@ -67,6 +57,9 @@ def plus_py(a, b):
     for x, y in zip(a, b):
         result.append(x + y)
     return result
+
+def plus_numpy(a, b):
+    return a + b
 
 def add_arrays(N, fun, fun_plus):
     # 랜덤한 1차원 배열 2개 생성
@@ -88,36 +81,9 @@ def add_arrays(N, fun, fun_plus):
     addition_time = add_end_time - add_start_time
     return array_creation_time, addition_time
 
-@app.get("/add-large-arrays-numpy-choices")
-# NumPy 기반 함수
-def gen_r_array_choices_numpy(N):
-    a = np.random.choice(range(101), size=N)
-    b = np.random.choice(range(101), size=N)
-    return a, b
 
-# Python random 기반 함수
-def gen_r_array_choices(N):
-    a = random.choices(range(101), k=N)
-    b = random.choices(range(101), k=N)
-    return a, b
 
-# 고차 함수: 실행 시간 측정
-def measure_time(func, N_values):
-    times = []
-    for N in N_values:
-        start = time.time()
-        func(N)
-        times.append(time.time() - start)
-    return times
 
-# 테스트할 N 값 생성 (1부터 1,000,000까지 100개 간격)
-N_values = np.linspace(1, 1_000_000, 100, dtype=int)
-
-# TODO 각 함수의 실행 시간 계산 위 배열에 추가
-numpy_times = []
-random_times = []
-numpy_times = measure_time(gen_r_array_choices_numpy, N_values)
-random_times = measure_time(gen_r_array_choices, N_values)
 
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None):
